@@ -121,46 +121,58 @@ public class TriangleAreaCalculatorGUI extends JFrame {
     private void calculateArea(ActionEvent e) {
         try {
             String strategy = (String) strategySelector.getSelectedItem();
-            assert strategy != null;
-            switch (strategy) {
-                case "Vertex Coordinates":
-
-                    String[] pointA = inputA.getText().split(" ");
-                    String[] pointB = inputB.getText().split(" ");
-                    String[] pointC = inputC.getText().split(" ");
-                    Point a = new Point(Integer.parseInt(pointA[0]),
-                            Integer.parseInt(pointA[1]));
-                    Point b = new Point(Integer.parseInt(pointB[0]),
-                            Integer.parseInt(pointB[1]));
-                    Point c = new Point(Integer.parseInt(pointC[0]),
-                            Integer.parseInt(pointC[1]));
-                    calculator.setStrategy(new VertexCoordinatesStrategy(a, b, c));
-                    break;
-                case "Heron's Formula":
-                    double sideA = Double.parseDouble(inputA.getText());
-                    double sideB = Double.parseDouble(inputB.getText());
-                    double sideC = Double.parseDouble(inputC.getText());
-                    calculator.setStrategy(new HeronFormulaStrategy(sideA, sideB, sideC));
-                    break;
-                case "Base-Height":
-                    double base = Double.parseDouble(inputA.getText());
-                    double height = Double.parseDouble(inputB.getText());
-                    calculator.setStrategy(new BaseHeightStrategy(base, height));
-                    break;
-                default:
-                    JOptionPane.showMessageDialog(this, "Please select a calculation method.", "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
+            if ("Vertex Coordinates".equals(strategy)) {
+                Point a = parsePoint(inputA.getText());
+                Point b = parsePoint(inputB.getText());
+                Point c = parsePoint(inputC.getText());
+                calculator.setStrategy(new VertexCoordinatesStrategy(a, b, c));
+            } else if ("Heron's Formula".equals(strategy)) {
+                double sideA = parseDouble(inputA.getText());
+                double sideB = parseDouble(inputB.getText());
+                double sideC = parseDouble(inputC.getText());
+                calculator.setStrategy(new HeronFormulaStrategy(sideA, sideB, sideC));
+            } else if ("Base-Height".equals(strategy)) {
+                double base = parseDouble(inputA.getText());
+                double height = parseDouble(inputB.getText());
+                calculator.setStrategy(new BaseHeightStrategy(base, height));
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select a calculation method.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-
             double area = calculator.calculateArea();
             resultLabel.setText("Area: " + area);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Invalid input. Please check your data.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "An unexpected error occurred.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
+    private Point parsePoint(String text) throws IllegalArgumentException {
+        String[] parts = text.split(" ");
+        if (parts.length != 2) throw new IllegalArgumentException("Please enter exactly two numbers separated by a space.");
+        try {
+            int x = Integer.parseInt(parts[0]);
+            int y = Integer.parseInt(parts[1]);
+            return new Point(x, y);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Please enter valid integer coordinates.");
+        }
+    }
+    
+    private double parseDouble(String text) throws NumberFormatException, IllegalArgumentException {
+        try {
+            double value = Double.parseDouble(text);
+            if (value <= 0) {
+                throw new IllegalArgumentException("Please enter a positive number.");
+            }
+            return value;
+        } catch (NumberFormatException ex) {
+            throw new NumberFormatException("Please enter a valid number.");
+        }
+    }
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             TriangleAreaCalculatorGUI ex = new TriangleAreaCalculatorGUI();
