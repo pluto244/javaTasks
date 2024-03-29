@@ -39,7 +39,7 @@ public class DonutFactoryGUI {
             updateDonutCounts();
         });
 
-        // Создаем панель для кнопок
+        
         JPanel buttonPanel = new JPanel(new GridLayout(1, 0));
         buttonPanel.add(eatRandomDonutButton);
         buttonPanel.add(eat100RandomDonutsButton);
